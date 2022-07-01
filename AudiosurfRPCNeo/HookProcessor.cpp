@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "HookProcessor.h"
 #include "RPCManager.h"
+#include "Q3DTools.h"
 
 LRESULT(WINAPI* TrueSendMessage)(
 	HWND hWnd,
@@ -56,6 +57,8 @@ LRESULT WINAPI MessageInterceptor(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPa
 }
 
 static TagLib::Tag* __fastcall FileRefGetTagInterceptor(TagLib::FileRef* self, DWORD edx) {
+	std::cout << Q3DTools::GetFloatFromChannel(reinterpret_cast<Aco_FloatChannel*>(Q3DTools::GetChannelFromGroup(54, 28))) << std::endl;
+
 	tagPtr = TrueFileRefGetTag(self);
 	artistTag = tagPtr->artist().toCString(true);
 	titleTag = tagPtr->title().toCString(true);
@@ -113,6 +116,9 @@ HookProcessor::HookProcessor() {
 	cds.lpData = (void*)str;
 
 	SendMessage(hwndTargetWin, WM_COPYDATA, 0, (LPARAM)&cds);
+
+	//Initialize Quest3D interface
+	Q3DTools::Q3DTools();
 }
 
 HookProcessor::~HookProcessor() {
