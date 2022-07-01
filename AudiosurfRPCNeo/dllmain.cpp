@@ -13,8 +13,9 @@ DWORD WINAPI MainThread(HMODULE hModule)
 	freopen_s(&f, "CONOUT$", "w", stdout);
 	std::cout << "DLL attached!\n";
 
-	std::cout << "Waiting for Discord Game SDK to be loaded...\n";
-	while (!GetModuleHandle("discord_game_sdk.dll")) {
+	std::cout << "Waiting for needed DLLs to load...\n";
+	//Discord Game SDK and Quest3D float channel
+	while (!GetModuleHandle("discord_game_sdk.dll") && !GetModuleHandle("BE69CCC4-CFC1-4362-AC81-767D199BBFC3.dll")) {
 		Sleep(250);
 	}
 	std::cout << "Discord Game SDK loaded at " << GetModuleHandle("discord_game_sdk.dll") << std::endl;

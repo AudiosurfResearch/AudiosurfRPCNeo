@@ -17,6 +17,6 @@ public:
 	static A3d_Channel* GetChannelFromGroup(int groupIndex, int channelIndex);
 	static float GetFloatFromChannel(Aco_FloatChannel* floatChannel);
 
-	static A3d_Channel* isPausedChannel;
-	static bool isPaused;
+	inline static Aco_FloatChannel* isPausedChannel = nullptr;
+	inline static bool isPaused = false;
 };

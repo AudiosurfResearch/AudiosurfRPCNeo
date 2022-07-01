@@ -103,6 +103,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y $(TargetPath) D:\SteamBibliothek\steamapps\common\Audiosurf\engine\channels</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying the DLL to the Audiosurf game directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -125,6 +131,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y $(TargetPath) D:\SteamBibliothek\steamapps\common\Audiosurf\engine\channels</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying the DLL to the Audiosurf game directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -143,6 +155,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y $(TargetPath) D:\SteamBibliothek\steamapps\common\Audiosurf\engine\channels</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying the DLL to the Audiosurf game directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -165,6 +183,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y $(TargetPath) D:\SteamBibliothek\steamapps\common\Audiosurf\engine\channels</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying the DLL to the Audiosurf game directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />

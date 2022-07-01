@@ -3,12 +3,13 @@
 #include "RPCManager.h"
 #include "Q3DTools.h"
 
-LRESULT(WINAPI* TrueSendMessage)(
+LRESULT (WINAPI* TrueSendMessage)(
 	HWND hWnd,
 	UINT   Msg,
 	WPARAM wParam,
 	LPARAM lParam) = SendMessageA;
 TagLib::Tag* (__thiscall* TrueFileRefGetTag)(TagLib::FileRef* self) = nullptr;
+void (__thiscall* TrueSetFloat)(Aco_FloatChannel* self, float newFloat) = nullptr;
 
 bool windowRegistered;
 
@@ -80,26 +81,29 @@ static TagLib::Tag* __fastcall FileRefGetTagInterceptor(TagLib::FileRef* self, D
 		cds.lpData = (void*)str;
 	}
 
+	//Get the channel that stores if the game is paused
+	if (!Q3DTools::isPausedChannel) Q3DTools::isPausedChannel = (Aco_FloatChannel*)Q3DTools::GetChannelFromGroup(54, 28);
+
 	return tagPtr;
 }
 
-HookProcessor::HookProcessor() {
-	DetourRestoreAfterWith();
-
-	TrueFileRefGetTag =
-		(TagLib::Tag * (__thiscall*)(TagLib::FileRef*))
-		DetourFindFunction("taglib.dll", "?tag@FileRef@TagLib@@QBEPAVTag@2@XZ");
-
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)TrueSendMessage, MessageInterceptor);
-	DetourAttach(&(PVOID&)TrueFileRefGetTag, FileRefGetTagInterceptor);
-	DetourTransactionCommit();
-
-	if (TrueFileRefGetTag == NULL) {
-		std::cout << "THIS IS HORRIBLE! COULDN'T HOOK TagLib::FileRef::tag()!\n";
+static void __fastcall SetFloatInterceptor(Aco_FloatChannel* self, DWORD edx, float newFloat) {
+	if (self == Q3DTools::isPausedChannel) {
+		std::cout << "Game pause state changed to " << newFloat << "\n";
+		if (newFloat != 0) {
+			Q3DTools::isPaused = true;
+			RPCManager::globalRPCManager->UpdatePresence(fullTags, "Paused");
+		}
+		else {
+			Q3DTools::isPaused = false;
+			RPCManager::globalRPCManager->UpdatePresence(fullTags, "Riding song");
+		}
 	}
 
+	TrueSetFloat(self, newFloat);
+}
+
+HookProcessor::HookProcessor() {
 	//get Audiosurf's window handle
 	HWND hwndTargetWin = FindWindow(NULL, "Audiosurf");
 	while (!hwndTargetWin)
@@ -108,6 +112,23 @@ HookProcessor::HookProcessor() {
 		Sleep(500);
 		hwndTargetWin = FindWindow(NULL, "Audiosurf");
 	}
+
+	DetourRestoreAfterWith();
+
+	TrueFileRefGetTag =
+		(TagLib::Tag * (__thiscall*)(TagLib::FileRef*))
+		DetourFindFunction("taglib.dll", "?tag@FileRef@TagLib@@QBEPAVTag@2@XZ");
+
+	TrueSetFloat =
+		(void(__thiscall*)(Aco_FloatChannel*, float))
+		DetourFindFunction("BE69CCC4-CFC1-4362-AC81-767D199BBFC3.dll", "?SetFloat@Aco_FloatChannel@@UAEXM@Z");
+
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&(PVOID&)TrueSendMessage, MessageInterceptor);
+	DetourAttach(&(PVOID&)TrueFileRefGetTag, FileRefGetTagInterceptor);
+	DetourAttach(&(PVOID&)TrueSetFloat, SetFloatInterceptor);
+	DetourTransactionCommit();
 
 	//create the command message and data struct
 	char* str = (char*)"ascommand quickstartregisterwindow Audiosurf";
@@ -127,5 +148,6 @@ HookProcessor::~HookProcessor() {
 	//Detach the hooks when the DLL is ejected
 	DetourDetach(&(PVOID&)TrueSendMessage, MessageInterceptor);
 	DetourDetach(&(PVOID&)TrueFileRefGetTag, FileRefGetTagInterceptor);
+	DetourDetach(&(PVOID&)TrueSetFloat, SetFloatInterceptor);
 	DetourTransactionCommit();
 }
